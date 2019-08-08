@@ -1,0 +1,316 @@
+/*
+ * @Author: wuhaiwei 
+ * @Date: 2018-11-08 17:13:16 
+ * @Last Modified by: wuhaiwei
+ * @Last Modified time: 2018-11-08 17:17:08
+ */
+@page-wrap-bg-color: #fff; // content背景
+// @theme-color: #00c284; //主题颜色
+@theme-color: #4B74FF; //主题颜色
+@grey: #9ba1a7; //灰色字体颜色
+@my-theme-hover-text-color: #ffffff;
+@page-wrap-padding: 20px;
+@blue-btn: #50b1f6;
+
+*:not(i) {
+  font-size: 14px;
+}
+
+button {
+  box-shadow: none !important;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+.center {
+  text-align: center;
+}
+
+.marginLeft10 {
+  margin-left: 10px;
+}
+
+.marginRight10 {
+  margin-right: 10px;
+}
+
+.marginTop10 {
+  margin-top: 10px;
+}
+
+.marginBottom10 {
+  margin-bottom: 10px;
+}
+
+.marginLeft20 {
+  margin-left: 20px;
+}
+
+.marginRight20 {
+  margin-right: 20px;
+}
+
+.marginTop20 {
+  margin-top: 20px;
+}
+
+.marginBottom20 {
+  margin-bottom: 20px;
+}
+
+.buttons {
+  button+button {
+    margin-left: 10px;
+  }
+
+  &.right {
+    float: right;
+  }
+}
+
+.search,
+.refresh {
+  font-size: 22px;
+  color: @theme-color;
+  line-height: 31px;
+  vertical-align: middle;
+  // margin-left: 10px;
+  cursor: pointer;
+}
+
+// 蓝色按钮
+.ivu-btn-blue {
+  border-color: @blue-btn;
+  color: @blue-btn;
+  background-color: @my-theme-hover-text-color;
+  font-size: 12px;
+}
+
+.ivu-btn-blue:hover {
+  color: @my-theme-hover-text-color;
+  background-color: @blue-btn;
+  border-color: @blue-btn;
+}
+
+.ivu-btn-blue:focus {
+  outline: none !important;
+  color: @blue-btn;
+}
+
+// 单选框的样式
+.ivu-radio-group {
+  label {
+    .ivu-radio-inner {
+      height: 12px;
+      width: 12px;
+
+      &:after {
+        height: 6px;
+        width: 6px;
+      }
+    }
+
+    span:nth-of-type(2) {
+      color: #666666;
+      font-weight: 400;
+    }
+  }
+}
+// 类别的表单头部按钮
+.category-table-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+// 类别的禁用按钮
+.disabled-btn {
+  color: #c5c8ce;
+  background-color: #f7f7f7;
+  border-color: #dcdee2;
+  &:hover {
+    color: #c5c8ce;
+    background-color: #f7f7f7;
+    border-color: #dcdee2;
+  }
+}
+// 表单弹框的无边框的table
+.none-border-table {
+  /deep/.ivu-table.ivu-table-stripe {
+    td {
+      height: 40px;
+    }
+    // 鼠标悬浮的高亮
+    .ivu-table-row-hover {
+      td {
+        background-color: rgba(75,116,255,0.15);
+      }
+    }
+    // 鼠标选中的高亮
+    .ivu-table-row-highlight {
+      td {
+        background-color: @theme-color!important;
+        color:#fff;
+        .ivu-icon.ivu-icon-md-create {
+          color:#fff!important;
+        }
+        &.power-switch {
+          .ivu-switch-checked {
+            border-color:#fff;
+          }
+        }
+      }
+    }
+    // 鼠标选中并悬浮的高亮
+    .ivu-table-row-hover.ivu-table-row-highlight {
+      td {
+        background-color: @theme-color;
+        color:#fff;
+      }
+    }
+    .ivu-table-cell {
+      padding-left: 0px;
+      padding-right: 0px;
+    }
+    &:after{
+      width: 0px;
+    }
+  }
+  &.ivu-table-wrapper {
+    border-left-color: transparent;
+  }
+  /deep/.ivu-btn {
+    padding: 4px 20px;
+  }
+}
+
+// 必填加*
+.required-input {
+  color: #ed3f14;
+  font-size: 12px;
+  line-height: 1;
+  font-family: SimSun;
+  margin-right: 1px;
+}
+
+.ivu-modal-header {
+  padding: 12px 16px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+.ivu-modal-footer {
+  padding-top: 0px;
+}
+.footer-button {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  .ivu-btn {
+    padding: 5px 36px 6px;
+  }
+  .ivu-btn-theme {
+    border-color: #AEB0B5;
+    color: #666;
+    &:hover {
+      background-color: #fff;
+    }
+  }
+}
+.table-page {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+    // 分页页码
+  .ivu-page-item-active {
+    background-color: @theme-color;
+    a {
+      color: #fff;
+    }
+    
+  }
+}
+.ivu-card-body {
+  // padding: 10px;
+}
+.ivu-form-item {
+  margin-bottom: 20px;
+}
+.ivu-checkbox-wrapper {
+  margin-right: 40px;
+  .ivu-checkbox {
+      margin-right: 10px;
+  }
+}
+// form表单迭代日志的样式
+.log-section {
+  width: 100%;
+  height: 94px;
+  border: 1px solid #dcdee2;
+  border-radius: 4px;
+  margin-top:4px;
+  list-style: none;
+  margin-bottom: 0px;
+  overflow: auto;
+  position: relative;
+  padding: 0 5px;
+  &::-webkit-scrollbar{
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+  }
+  // 内轨道
+  &::-webkit-scrollbar-track{
+    // box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    border-radius: 8px;
+    background-color: #fff;
+  }
+  // 外轨道
+  &::-webkit-scrollbar-thumb{
+    height: 16px;
+    border-radius: 8px;
+    // box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #ccc;
+  }
+  li {
+    height: 21px;
+  }
+  span {
+    margin: 3px 10px;
+  }
+  .ivu-icon.ivu-icon-md-close {
+    color: @theme-color;
+    cursor: pointer;
+  }
+  .more-tip {
+    position: absolute;
+    right: 5px;
+    top:0px;
+    cursor: pointer;
+    span {
+      margin: 5px 5px;
+      color:@theme-color;
+    }
+    .ivu-icon.ivu-icon-ios-arrow-down {
+      color: @theme-color;
+      cursor: pointer;
+    }
+  }
+}
+// 垂直居中对齐弹框
+.vertical-center-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .ivu-modal{
+      top: 0;
+  }
+}
+
