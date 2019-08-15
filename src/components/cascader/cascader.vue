@@ -42,14 +42,13 @@
                         :change-on-select="changeOnSelect"
                         :trigger="trigger">
                     </Caspanel>
-                    <div class="footer">
-                        <!-- 设置当前页 -->
+                    <!-- <div class="footer">
                         <Page 
                             size="small" 
                             :total="data.length" 
                             @on-change="curentPageChange"
                             :page-size="pageSize"/>
-                    </div>
+                    </div> -->
                     <div 
                         :class="[prefixCls + '-dropdown']" 
                         v-show="filterable && query !== '' && querySelections.length">
@@ -185,7 +184,8 @@
                 query: '',
                 validDataStr: '',
                 isLoadedChildren: false,    // #950
-                currentPage: 1
+                currentPage: 1,
+                locker: null
             };
         },
         computed: {
@@ -306,8 +306,27 @@
                 this.currentPage = val;
             },
             // 滚动到顶部或底部
-            scrollToEnd () {
-
+            // 需要注意：当用户拖动滚动条的时候，得设置一个定时器，不然刷的太快
+            scrollToEnd (type, el) {
+                if (this.locker !== null) {
+                    return;
+                }
+                this.locker = setTimeout(() => {
+                    if (type === 'top') {
+                        if (this.currentPage > 1) {
+                            /** 56是两个额外li高度的偏移量 */
+                            el.scrollTop = el.scrollHeight - el.clientHeight - 56;
+                            this.currentPage = this.currentPage - 1;
+                        }
+                    } else if (type === 'bottom') {
+                        const maxPage = Math.ceil(this.data.length / this.pageSize);
+                        if (this.currentPage < maxPage) {
+                            this.currentPage = this.currentPage + 1;
+                            el.scrollTop = 5;
+                        }
+                    }
+                    this.locker = null;
+                }, 100);
             },
             clearSelect () {
                 if (this.disabled) return false;
@@ -490,6 +509,16 @@
     border-bottom-right-radius: 4px;
     border-bottom-left-radius: 4px;
 }
-
+.ivu-cascader-menu{
+    overflow-y: auto;
+    min-width: 220px;
+    overflow-x: hidden;
+}
+.ivu-cascader-menu .ivu-cascader-menu-item{
+    width: 220px;
+    text-overflow: ellipsis;
+    overflow:hidden;
+    white-space:nowrap; 
+}
 </style>
 

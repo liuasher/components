@@ -75,17 +75,20 @@
         computed:{
             filterData(){
                 if (!this.currentPage || !this.pageSize) {
-                    return this.data.slice(this.currentPage - 1, this.pageSize);
+                    /** 三级菜单不做处理 */
+                    return this.data;
                 } else {
-                    let begin = (this.currentPage - 1) * this.pageSize;
-                    let end = this.currentPage * this.pageSize;
-                    return this.data.slice(begin, end);
+                    let begin   = (this.currentPage - 1) * this.pageSize - 1;
+                    let end     = this.currentPage * this.pageSize + 1;
+                    // console.log('截取范围：', begin < 0 ? 0 : begin, end);
+                    return this.data.slice(begin < 0 ? 0 : begin, end);
                 }
             }
         },
         methods: {
-            handleOnScroll(){
-                // console.log(11111111);
+            handleOnScroll(type, el){
+                /** 通知父亲切换页面 */
+                this.$emit('scroll-to-end', type, el);
             },
             handleClickItem (item) {
                 if (this.trigger !== 'click' && item.children && item.children.length) return;  // #1922

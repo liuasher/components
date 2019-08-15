@@ -1,16 +1,18 @@
 let scrollCallback = function(callback, el) {
-  let scrollTop = el.scrollTop;
-  let scrollHeight = el.scrollHeight;
-  // if (document.body.scrollHeight < 1000) {
-  //     return
-  // }
-  // if (document.body.scrollHeight - window.scrollY - 100  document.body.clientHeight) {
-      callback();
-  // }
+  const scrollTop = el.scrollTop;
+  const scrollHeight = el.scrollHeight;
+  const scrollHeightOffset = el.clientHeight;
+  const offset = 0;
+  
+  if (scrollTop - offset <= 0) {
+    callback('top', el);
+  } else if (scrollTop + offset >= scrollHeight - scrollHeightOffset) {
+    callback('bottom', el);
+  }
 };
-let callBackWarpped; // 新变量 保存引用
+let callBackWarpped; 
 export default {
-  bind: function(el, binding, vnode) {
+  bind: function(el, binding) {
     callBackWarpped =  scrollCallback.bind({}, binding.value, el);
     el.addEventListener('scroll', callBackWarpped);
   },

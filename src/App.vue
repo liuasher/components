@@ -1,17 +1,26 @@
 <template>
   <div class="select-search">    
     <div class="dashboard">
-      <div>
+      <!-- 1.0 无限滚动 -->
+      <!-- <div>
         <my-cascader 
           filterable 
           :data="positions" 
-          class="xxxxxxxxx"
           v-model="position" 
           @on-change="changePosition" 
           placeholder="..." 
           trigger="hover">
         </my-cascader>
-      </div>
+      </div> -->
+
+      <!-- 2.0 模板插槽 -->
+      <my-selecter
+        :data="data">
+        <div slot="xxxyyy" slot-scope="props">
+          {{props.testProps}}
+        </div>
+      </my-selecter>
+
     </div>
   </div>
 </template>
@@ -19,18 +28,58 @@
 
 
 import myCascader from '@/components/cascader';
+import mySelecter from '@/components/selecter';
 
 import mockData from './mock';
 
 export default {
   name: 'App',
   components: {
-    myCascader
+    myCascader,
+    mySelecter
   },
   data() {
     return {
       position: [],
       positions:[],
+
+      data:[{
+        id: 1,
+        value: {
+          name: 'random-1-001',
+          info: {
+            time: '2018-12-03 12:45',
+            type: 'default'
+          }
+        }
+      },{
+        id: 2,
+        value: {
+          name: 'random-2-002',
+          info: {
+            time: '2016-12-03 20:25',
+            type: 'warning'
+          }
+        }
+      },{
+        id: 3,
+        value: {
+          name: 'random-3-003',
+          info: {
+            time: '2013-12-03 03:13',
+            type: 'error'
+          }
+        }
+      },{
+        id: 4,
+        value: {
+          name: 'random-4-004',
+          info: {
+            time: '2010-12-03 08:26',
+            type: 'success'
+          }
+        }
+      }]
     };
   },
   watch: {
