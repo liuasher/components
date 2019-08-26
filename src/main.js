@@ -12,7 +12,10 @@ import iView from 'iview/dist/iview.js';
 import 'iview/dist/styles/iview.css';
 import i18n from '@/locale';
 
+import Scrollbar from '@/components/scrollbar';
+
 Vue.use(iView);
+Vue.use(Scrollbar);
 
 Vue.config.productionTip = false;
 Vue.config.lang = 'zh-CN';

@@ -1,8 +1,9 @@
 <template>
   <div class="select-search">    
     <div class="dashboard">
-      <!-- 1.0 无限滚动 -->
-      <!-- <div>
+
+      <h4>无限滚动，在iview基础上做的调优</h4>
+      <div>
         <my-cascader 
           filterable 
           :data="positions" 
@@ -11,15 +12,34 @@
           placeholder="..." 
           trigger="hover">
         </my-cascader>
-      </div> -->
+      </div>
 
-      <!-- 2.0 模板插槽 -->
-      <my-selecter
-        :data="data">
-        <div slot="xxxyyy" slot-scope="props">
-          {{props.testProps}}
-        </div>
-      </my-selecter>
+      <h4>滚动槽</h4>
+      <div class="scroll-container">
+        <my-scrollbar 
+          class="scroll-block">
+          <ul>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+          </ul>
+        </my-scrollbar>
+      </div>
 
     </div>
   </div>
@@ -28,58 +48,20 @@
 
 
 import myCascader from '@/components/cascader';
-import mySelecter from '@/components/selecter';
 
-import mockData from './mock';
+// import mockData from './mock';
 
 export default {
   name: 'App',
   components: {
     myCascader,
-    mySelecter
   },
   data() {
     return {
       position: [],
       positions:[],
 
-      data:[{
-        id: 1,
-        value: {
-          name: 'random-1-001',
-          info: {
-            time: '2018-12-03 12:45',
-            type: 'default'
-          }
-        }
-      },{
-        id: 2,
-        value: {
-          name: 'random-2-002',
-          info: {
-            time: '2016-12-03 20:25',
-            type: 'warning'
-          }
-        }
-      },{
-        id: 3,
-        value: {
-          name: 'random-3-003',
-          info: {
-            time: '2013-12-03 03:13',
-            type: 'error'
-          }
-        }
-      },{
-        id: 4,
-        value: {
-          name: 'random-4-004',
-          info: {
-            time: '2010-12-03 08:26',
-            type: 'success'
-          }
-        }
-      }]
+      data:[]
     };
   },
   watch: {
@@ -97,17 +79,17 @@ export default {
   methods: {
 
     qyeryData(){
-      let data = mockData;
-      this.positions = data.result;
-      for (let item of this.positions) {
-        item.label = item.title;
-        item.value = item.positionId;
-        for(let room of item.children) {
-            room.label = room.title;
-            room.value = room.positionId;
-        }
-        item.children.unshift({label: item.label,value: item.value});
-      }
+      // let data = mockData;
+      // this.positions = data.result;
+      // for (let item of this.positions) {
+      //   item.label = item.title;
+      //   item.value = item.positionId;
+      //   for(let room of item.children) {
+      //       room.label = room.title;
+      //       room.value = room.positionId;
+      //   }
+      //   item.children.unshift({label: item.label,value: item.value});
+      // }
     },
 
     /** 一级选项滚动 */
@@ -123,7 +105,44 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
+
+.scroll-container{
+  overflow: hidden;
+  position: relative;
+  height: 200px;
+  .scroll-block{
+    height: 100%;
+    .el-scrollbar__wrap{
+      height: 100%;
+      overflow-x: hidden;
+    }
+    .is-vertical{
+      width: 6px;
+      top: 2px;
+      position: absolute;
+      background: lightskyblue;
+      right: 2px;
+      bottom: 2px;
+      z-index: 1;
+      border-radius: 4px;
+      .el-scrollbar__thumb{
+        position: relative;
+        display: block;
+        width: 0;
+        height: 0;
+        cursor: pointer;
+        border-radius: inherit;
+        background-color: rgba(144,147,153,.3);
+        transition: background-color .3s;
+        height: 29.5129%;
+        transform: translateY(0%);
+        width: 100%;
+      }
+    }
+  }
+}
+
 
 .dashboard{
   background: #eef1f5;
