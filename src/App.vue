@@ -37,6 +37,18 @@
             <li>1111111</li>
             <li>2222222</li>
             <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
+            <li>1111111</li>
+            <li>2222222</li>
+            <li>3333333</li>
           </ul>
         </my-scrollbar>
       </div>
@@ -111,36 +123,7 @@ export default {
   overflow: hidden;
   position: relative;
   height: 200px;
-  .scroll-block{
-    height: 100%;
-    .el-scrollbar__wrap{
-      height: 100%;
-      overflow-x: hidden;
-    }
-    .is-vertical{
-      width: 6px;
-      top: 2px;
-      position: absolute;
-      background: lightskyblue;
-      right: 2px;
-      bottom: 2px;
-      z-index: 1;
-      border-radius: 4px;
-      .el-scrollbar__thumb{
-        position: relative;
-        display: block;
-        width: 0;
-        height: 0;
-        cursor: pointer;
-        border-radius: inherit;
-        background-color: rgba(144,147,153,.3);
-        transition: background-color .3s;
-        height: 29.5129%;
-        transform: translateY(0%);
-        width: 100%;
-      }
-    }
-  }
+  
 }
 
 
