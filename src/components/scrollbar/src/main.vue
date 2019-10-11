@@ -112,6 +112,7 @@ export default {
 
   computed: {
     wrap() {
+      console.log(11111111111111);
       return this.$refs.wrap;
     }
   },
