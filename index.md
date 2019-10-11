@@ -1,4 +1,1 @@
-release 第一次提交
-release 第二次提交
-release 第三次提交
-release 第四次提交
+release 第1次提交
