@@ -89,6 +89,7 @@
     import Emitter from 'iview/src/mixins/emitter';
     import Locale from 'iview/src/mixins/locale';
     console.log(999999999999999);
+    console.log(1111111);
     const prefixCls = 'ivu-cascader';
     const selectPrefixCls = 'ivu-select';
     console.log(1111111);
