@@ -102,6 +102,7 @@ export default {
   },
 
   data() {
+    console.log(1111111);
     return {
       sizeWidth: '0',
       sizeHeight: '0',

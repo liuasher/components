@@ -11,7 +11,7 @@ import '@/style/index.less';
 import iView from 'iview/dist/iview.js';
 import 'iview/dist/styles/iview.css';
 import i18n from '@/locale';
-
+console.log(1111111);
 import Scrollbar from '@/components/scrollbar';
 
 Vue.use(iView);
