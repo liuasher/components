@@ -223,6 +223,7 @@ export default {
 
   destroyed() {
     // 防止内存泄漏
+    console.log(11111111111111);
     off(document, 'mouseup', this.mouseUpDocumentHandler);
   }
 };

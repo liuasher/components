@@ -23,6 +23,7 @@ export const BAR_MAP = {
 
 /** 滚动按住的位置 */
 export function renderThumbStyle({ move, size, bar }) {
+  console.log(11111111111111);
   const style = {};
   const translate = `translate${bar.axis}(${ move }%)`;
 

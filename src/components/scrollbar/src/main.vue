@@ -102,6 +102,7 @@ export default {
   },
 
   data() {
+    console.log(1111111);
     return {
       sizeWidth: '0',
       sizeHeight: '0',
@@ -112,6 +113,7 @@ export default {
 
   computed: {
     wrap() {
+      console.log(11111111111111);
       return this.$refs.wrap;
     }
   },
