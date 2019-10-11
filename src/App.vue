@@ -91,6 +91,7 @@ export default {
   methods: {
 
     qyeryData(){
+      console.log(11111111111111);
       // let data = mockData;
       // this.positions = data.result;
       // for (let item of this.positions) {
@@ -107,6 +108,7 @@ export default {
     /** 一级选项滚动 */
     handleScrollTobottom(){
       console.log(1111111);
+      console.log(11111111111111);
     },
 
     changePosition(){
