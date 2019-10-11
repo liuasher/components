@@ -92,6 +92,14 @@
     console.log(1111111);
     console.log(999999999999999);
     console.log(1111111);
+    console.log(999999999999999);
+    console.log(1111111);
+    console.log(999999999999999);
+    console.log(1111111);
+    console.log(999999999999999);
+    console.log(1111111);
+    console.log(999999999999999);
+    console.log(1111111);
     const prefixCls = 'ivu-cascader';
     const selectPrefixCls = 'ivu-select';
     console.log(1111111);
