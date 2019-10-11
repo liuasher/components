@@ -1,6 +1,7 @@
 
 master:
   master - 1
+  master - 2
 
 release:
   release - 1
