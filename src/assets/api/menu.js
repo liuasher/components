@@ -12,4 +12,4 @@ export default {
     tableau_report:'/menuTableauMap/getTableauReportByCode',//get 
     tableau_default_params:'/menuTableauMap/getTableauDefaultReportParams',//get     
   }
-}
+};

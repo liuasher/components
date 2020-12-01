@@ -5,4 +5,4 @@ export default {
   // get_sys_token: '/authc/cross/identification',
   get_user_info: '/authc/get/privilege',
   logout: '/authc/logout'
-}
+};

@@ -133,6 +133,6 @@ export function setMenu(localData, resData) {
           }
       }
   }
-  return localData
+  return localData;
 }
 

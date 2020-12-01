@@ -8,4 +8,4 @@ export default {
     tag_del:'/tableauParams/delTag', // del
     
   }
-}
+};

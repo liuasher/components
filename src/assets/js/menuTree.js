@@ -2,11 +2,11 @@
 export function menuAuthTree(privilegesList,parentVal,parentkey,childKey) {
 	let menuList = privilegesList.filter(item => {
             return item[parentkey].toUpperCase() == parentVal.toUpperCase();
-    })
+    });
 	if (menuList.length > 0) {
 		for (const menu of menuList) {
-			if (typeof menu[childKey]!= "undefined") {
-				menu['childs'] = menuAuthTree(privilegesList,menu[childKey],parentkey,childKey)
+			if (typeof menu[childKey]!= 'undefined') {
+				menu['childs'] = menuAuthTree(privilegesList,menu[childKey],parentkey,childKey);
 			}
 		}
 	}
@@ -20,11 +20,11 @@ export function menuAuthTree(privilegesList,parentVal,parentkey,childKey) {
 * 
 */
 export function formatMenu(permsData,menuData,id,parentId) {
-    let menuList = []
+    let menuList = [];
     for (const perms of permsData) {
         let permsFilter = menuData.filter(item => {
-            return item[id] == perms[parentId]
-        })
+            return item[id] == perms[parentId];
+        });
         if (permsFilter.length > 0) {
             menuList = menuList.concat(permsFilter);
             let filterLsit = formatMenu(permsFilter,menuData,'code','parentCode');
@@ -34,7 +34,7 @@ export function formatMenu(permsData,menuData,id,parentId) {
     }
     //过滤数组中重复的数据
     menuList = new Set(menuList);
-    return [...menuList]
+    return [...menuList];
 }
 /*
 *保证菜单位置不变动，只能在本地菜单上加标识，进行过滤
@@ -44,12 +44,12 @@ export function formatMenu(permsData,menuData,id,parentId) {
 export function formatLocMenu(permsData,menuData,id,parentId){
     for (const menu of menuData) {
         let menuFilter = permsData.filter(item =>{
-            return item[parentId] == menu[id]
-        })
+            return item[parentId] == menu[id];
+        });
         if(menuFilter.length > 0){
             menu['isShow'] = true;
             menuFilter.map(value=>{
-                value['parentCode'] = menu['parentCode']
+                value['parentCode'] = menu['parentCode'];
             });
             formatLocMenu(menuFilter,menuData,'code','parentCode'); 
         }
@@ -59,11 +59,11 @@ export function formatLocMenu(permsData,menuData,id,parentId){
 //返回生成好的菜单树
 export function getMenuTree(permsData,menuData,parentVal) {
     formatLocMenu(permsData,menuData,'code','code');
-    let menuList = []
+    let menuList = [];
     for (const menu of menuData) {
         if(menu['isShow']){
-            menuList.push(menu)
+            menuList.push(menu);
         }
     }
-    return menuAuthTree(menuList,parentVal,'parentCode','code')
+    return menuAuthTree(menuList,parentVal,'parentCode','code');
 }

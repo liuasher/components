@@ -1,14 +1,14 @@
-import CryptoJS from 'crypto-js/crypto-js'
+import CryptoJS from 'crypto-js/crypto-js';
 
 // 默认的 KEY 与 iv 如果没有给
-const KEY = CryptoJS.enc.Utf8.parse("3C28C1BEF9E73000");
+const KEY = CryptoJS.enc.Utf8.parse('3C28C1BEF9E73000');
 const IV = CryptoJS.enc.Utf8.parse('B68F7CD20BE1687E');
 /**
  * AES加密 ：字符串 key iv  返回base64 
  */
 export function Encrypt(word, keyStr, ivStr) {
-  let key = KEY
-  let iv = IV
+  let key = KEY;
+  let iv = IV;
 
   if (keyStr) {
     key = CryptoJS.enc.Utf8.parse(keyStr);
@@ -30,8 +30,8 @@ export function Encrypt(word, keyStr, ivStr) {
  *
  */
 export function Decrypt(word, keyStr, ivStr) {
-  let key  = KEY
-  let iv = IV
+  let key  = KEY;
+  let iv = IV;
 
   if (keyStr) {
     key = CryptoJS.enc.Utf8.parse(keyStr);

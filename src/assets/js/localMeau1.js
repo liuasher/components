@@ -156,6 +156,6 @@ const menusLoc = {
       parentCode: 'Sdk'
     }
   ]
-}
+};
 
-export default menusLoc
+export default menusLoc;

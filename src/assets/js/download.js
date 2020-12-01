@@ -40,7 +40,7 @@ export function downloadFile(config = {}, cb1, cb2, cb3) {
     if (data[key] || data[key] === 0 || data[key] === '') {
       paramStr += key + '=' + data[key] + '&';
     }
-  })
+  });
   if (paramStr !== '') {
     paramStr = paramStr.substr(0, paramStr.lastIndexOf('&'));
     url = url + '?' + paramStr;

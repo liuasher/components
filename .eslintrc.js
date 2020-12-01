@@ -4,14 +4,14 @@ module.exports = {
         browser: true,
         node: true
     },
-    extends: ["plugin:vue/essential","eslint:recommended", ],
+    extends: ['plugin:vue/essential','eslint:recommended', ],
     rules: {
-        "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
-        "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-        "semi": ["error", "always"],
-        "quotes": ["error", "single"],
+        'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+        'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+        'semi': ['error', 'always'],
+        'quotes': ['error', 'single'],
     },
     parserOptions: {
-        parser: "babel-eslint"
+        parser: 'babel-eslint'
     }
 };

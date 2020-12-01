@@ -26,4 +26,4 @@ export default [
   { 'id': 209, 'parentId': 1, 'code': 'app', 'name': 'APP' },
   { 'parentId': 209, 'code': 'appManage', 'name': 'APP管理' },
   // { 'parentId': 209, 'code': 'appEleSortManage', 'name': '类别管理' },
-]
+];

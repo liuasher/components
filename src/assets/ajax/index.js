@@ -1,14 +1,14 @@
-import { LoadingBar, Message } from 'iview'
-import axios from 'axios'
+import { LoadingBar, Message } from 'iview';
+import axios from 'axios';
 
 export default {
   get(url, data, excludeLoadProgress, config = {}) {
     let paramStr = '';
     Object.keys(data).forEach(key => {
       if (data[key] || data[key] === 0 || data[key] === '') {
-        paramStr += key + '=' + data[key] + '&'
+        paramStr += key + '=' + data[key] + '&';
       }
-    })
+    });
     if (paramStr !== '') {
       paramStr = paramStr.substr(0, paramStr.lastIndexOf('&'));
       url = url + '?' + paramStr;
@@ -27,15 +27,15 @@ export default {
             content: res.msg || '服务器忙碌，请稍后再试！',
             duration: 5
           });
-          resolve(res)
+          resolve(res);
         } else {
-          if (!excludeLoadProgress) LoadingBar.error()
-          resolve(res)
+          if (!excludeLoadProgress) LoadingBar.error();
+          resolve(res);
         }
       }, (err) => {
-        err.result = '服务器繁忙！'
-        reject(err)
-      })
+        err.result = '服务器繁忙！';
+        reject(err);
+      });
     });
   },
   post(url, params, excludeLoadProgress, config = {}) {
@@ -52,15 +52,15 @@ export default {
             content: res.msg || '服务器忙碌，请稍后再试！',
             duration: 5
           });
-          resolve(res)
+          resolve(res);
         } else {
-          if (!excludeLoadProgress) LoadingBar.error()
-          resolve(res)
+          if (!excludeLoadProgress) LoadingBar.error();
+          resolve(res);
         }
       }, (err) => {
-        err.result = '服务器繁忙！'
-        reject(err)
-      })
+        err.result = '服务器繁忙！';
+        reject(err);
+      });
     });
   }
-}
+};

@@ -84,9 +84,9 @@ export default {
         return n;
   
     } else if (o instanceof Function) {
-      return o
+      return o;
     } else if (o instanceof Object) {
-        var n = {}
+        var n = {};
         for (var i in o) {
             n[i] = this.deepCopy(o[i]);
         }
@@ -103,10 +103,10 @@ export default {
       hasPower:0,
       roleName: user.roles[0].roleName,
       userId: user.userId
-    }
+    };
   },
     getUrlKey(name) {
-        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ""])[1].replace(/\+/g, '%20')) || null
+        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ''])[1].replace(/\+/g, '%20')) || null;
     }  
 
 
