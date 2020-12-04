@@ -1,7 +1,8 @@
 <script>
 import fecha from 'element-ui/src/utils/date';
 import { range as rangeArr, getFirstDayOfMonth, getPrevMonthLastDays, getMonthDays, getI18nSettings, validateRangeInOneMonth } from 'element-ui/src/utils/date-util';
-
+import dayjs from 'dayjs';
+const oneDay = 86400000;
 export default {
     props: {
         selectedDay: String, // formated date yyyy-MM-dd
@@ -15,14 +16,21 @@ export default {
         },
         date: Date,
         hideHeader: Boolean,
-        firstDayOfWeek: Number
+        firstDayOfWeek: Number,
+        // 项目数据
+        projects: {
+            type: Array,
+            default: () => []
+        },
+        selectedId: String
     },
 
     inject: ['elCalendar'],
 
     data() {
         return {
-            WEEK_DAYS: getI18nSettings().dayNames
+            WEEK_DAYS: getI18nSettings().dayNames,
+            PresetColor: ['#ee68b0', '#5ebbd7', '#afd276', '#ff9110', '#7687d2']
         };
     },
 
@@ -67,18 +75,96 @@ export default {
             this.$emit('pick', date);
         },
 
-        cellRenderProxy({ text, type }) {
-            let render = this.elCalendar.$scopedSlots.dateCell;
-            if (!render) return <span>{text}</span>;
 
-            const day = this.getFormateDate(text, type);
-            const date = new Date(day);
-            const data = {
-                isSelected: this.selectedDay === day,
-                type: `${type}-month`,
-                day
-            };
-            return render({ date, data });
+        isStart(project, date) {
+            return project.startTime + oneDay > date;
+        },
+        isEnd(project, date) {
+            return project.endTime - oneDay < date;
+        },
+        hasContent(project, date, classes, { rowIndex, itemIndex }) {
+            if (classes.indexOf('track-first') !== -1) {
+                return true;
+            } else if (rowIndex === 0 && itemIndex === 0 && !this.hideHeader) {
+                return true;
+            }
+            return false;
+        },
+        getTips(project) {
+            return `
+                项目: ${project.projectName}
+                开始: ${project.startTime}
+                结束: ${project.endTime}
+            `;
+        },
+
+        /**
+         * 元素内渲染每个project的方法
+         * @param {project} project  项目
+         * @param {timestamp} date  元素代表的日期
+         * @param {number} rowIndex  每一行的索引
+         * @param {number} itemIndex 一行内元素的索引
+         * @param {number} projectIndex 元素内项目的索引
+         */
+        renderProject(project, date, indexGroup) {
+            const { projectIndex } = indexGroup;
+            const classes = ['project'];
+            if (project.startTime <= date && date <= project.endTime) {
+                if (this.isStart(project, date)) {
+                    classes.push('track-first');
+                }
+                if (this.isEnd(project, date)) {
+                    classes.push('track-last');
+                }
+                const hasContent = this.hasContent(project, date, classes, indexGroup);
+                const content = `${project.projectName}（共${project.authDays}天权限）`
+                //
+                if (projectIndex == this.selectedId) {
+                    classes.push('track-opacity')
+                }
+                return <el-tooltip open-delay={600} class="item" effect="dark" placement="top">
+                    <div slot="content">{this.getTips(project)}</div>
+                    <span data-project-index={projectIndex} class={classes} style={{ backgroundColor: this.PresetColor[projectIndex] }}>
+                        {hasContent ? content : ''}
+                    </span>;
+                </el-tooltip>;
+            }
+            return <span class="project"></span>;
+        },
+
+        /**
+         * 渲染日历中每个cell的方法，一个cell称为一个元素
+         * @param {number} rowIndex  每一行的索引
+         * @param {number} itemIndex 一行内元素的索引
+         * @param {number} projectIndex 元素内项目的索引
+         */
+        cellRenderProxy({ text, type }, rowIndex, itemIndex) {
+            const date = this.getFormateDate(text, type);
+            const cellDate = dayjs(date).valueOf();
+            return <div class="date-container">
+                <div class="date-info">{text}</div>
+                <div class="project-lists" onpointermove={(e) => this.handlePointerMove(e)} >
+                    {
+                        this.projects.map((project, projectIndex) => this.renderProject(project, cellDate, {
+                            projectIndex, rowIndex, itemIndex
+                        }))
+                    }
+                </div>
+            </div>;
+        },
+        handleClick(e, { text, type }) {
+            const target = e.target.dataset.projectIndex;
+            if (target === undefined) return;
+            const date = this.getFormateDate(text, type);
+            e.stopPropagation()
+            this.$emit('click', this.projects[target], date, { text, type });
+        },
+        handlePointerMove(e) {
+            const target = e.target.dataset.projectIndex
+            if (target === this.selectedId) {
+                return
+            }
+            this.$emit('pointer', target)
         }
     },
 
@@ -186,9 +272,10 @@ export default {
                                 row.map((cell, key) => <td key={key}
                                     class={this.getCellClass(cell)}
                                     onClick={this.pickDay.bind(this, cell)}>
-                                    <div class="el-calendar-day">
+                                    <div class="el-calendar-day project-container"
+                                        onClick={(e) => this.handleClick(e, cell)}>
                                         {
-                                            this.cellRenderProxy(cell)
+                                            this.cellRenderProxy(cell, index, key)
                                         }
                                     </div>
                                 </td>)
@@ -200,3 +287,62 @@ export default {
     }
 };
 </script>
+<style lang="less" scoped>
+@dateHeight: 26px;
+@projectHeight: 14px;
+
+.el-calendar-day.project-container {
+    background: #ffffff;
+    height: auto;
+    padding: 0;
+    .date-container {
+        .date-info {
+            width: @dateHeight;
+            font-size: 12px;
+            height: @dateHeight;
+            line-height: @dateHeight;
+            border-radius: @dateHeight / 2;
+            margin: 0 auto;
+            margin-top: 2px;
+            margin-bottom: 2px;
+            text-align: center;
+        }
+        .project-lists {
+            display: flex;
+            flex-direction: column;
+            .project {
+                font-size: 12px;
+                height: @projectHeight;
+                line-height: @projectHeight;
+                margin-top: 2px;
+                color: #333;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+            // .project:hover {
+            //     opacity: 0.8;
+            // }
+            .track-first {
+                border-top-left-radius: 6px;
+                border-bottom-left-radius: 6px;
+                text-indent: 6px;
+            }
+            .track-last {
+                border-top-right-radius: 6px;
+                border-bottom-right-radius: 6px;
+                text-indent: 6px;
+            }
+            .track-opacity {
+                background: #409eff !important;
+            }
+        }
+    }
+}
+.is-today {
+    .date-info {
+        background: #ee3030;
+        color: #fff;
+    }
+}
+</style>

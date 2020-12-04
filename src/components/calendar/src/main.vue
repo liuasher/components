@@ -2,36 +2,53 @@
     <div class="el-calendar">
         <div class="el-calendar__header">
             <div class="el-calendar__title">
-                {{ i18nDate }}
+                {{ dateLabel }}
             </div>
+
+            <div :style="{fontSize:'12px'}">
+                {{selectedDay}}
+                <br />
+                {{validatedRange}}
+                <br />
+                {{getRange()}}
+                <br />
+                {{now}}
+            </div>
+
             <div class="el-calendar__button-group"
-                 v-if="validatedRange.length === 0">
+                 v-if="type === 1">
                 <el-button-group>
                     <el-button type="plain"
                                size="mini"
-                               @click="selectDate('prev-month')">
+                               @click="selectDate(SWITCH_TYPE.Prev)">
                         {{ t('el.datepicker.prevMonth') }}
                     </el-button>
                     <el-button type="plain"
                                size="mini"
-                               @click="selectDate('today')">
+                               @click="selectDate(SWITCH_TYPE.Now)">
                         {{ t('el.datepicker.today') }}
                     </el-button>
                     <el-button type="plain"
                                size="mini"
-                               @click="selectDate('next-month')">
+                               @click="selectDate(SWITCH_TYPE.Next)">
                         {{ t('el.datepicker.nextMonth') }}
                     </el-button>
                 </el-button-group>
             </div>
         </div>
+
+        selectedId: {{selectedId}}
+
         <div class="el-calendar__body"
-             v-if="validatedRange.length === 0"
+             v-if="type === 1"
              key="no-range">
             <date-table :date="date"
-                        :selected-day="realSelectedDay"
-                        :first-day-of-week="realFirstDayOfWeek"
-                        @pick="pickDay" />
+                        :selected-day="selectedDay"
+                        :first-day-of-week="firstDayOfWeek"
+                        :projects="lists"
+                        @pick="pickDay"
+                        @pointer="hoverProject"
+                        @click="clickItem" />
         </div>
         <div v-else
              class="el-calendar__body"
@@ -39,16 +56,21 @@
             <date-table v-for="(range, index) in validatedRange"
                         :key="index"
                         :date="range[0]"
-                        :selected-day="realSelectedDay"
+                        :selected-day="selectedDay"
                         :range="range"
                         :hide-header="index !== 0"
-                        :first-day-of-week="realFirstDayOfWeek"
-                        @pick="pickDay" />
+                        :first-day-of-week="firstDayOfWeek"
+                        :projects="lists"
+                        :selected-id="selectedId"
+                        @pick="pickDay"
+                        @pointer="hoverProject"
+                        @click="clickItem" />
         </div>
     </div>
 </template>
 
 <script>
+import dayjs from 'dayjs';
 import Locale from 'element-ui/src/mixins/locale';
 import fecha from 'element-ui/src/utils/date';
 import ElButton from 'element-ui/packages/button';
@@ -56,14 +78,28 @@ import ElButtonGroup from 'element-ui/packages/button-group';
 import DateTable from './date-table';
 import { validateRangeInOneMonth } from 'element-ui/src/utils/date-util';
 
-const validTypes = ['prev-month', 'today', 'next-month'];
 const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const oneDay = 86400000;
+
+const SWITCH_TYPE = {
+    Prev: 0,
+    Now: 1,
+    Next: 2
+};
 
 export default {
     name: 'ElCalendar',
 
     mixins: [Locale],
+
+    data() {
+        return {
+            selectedDay: '',
+            firstDayOfWeek: 1,
+            now: new Date(),
+            selectedId: ''
+        };
+    },
 
     components: {
         DateTable,
@@ -72,23 +108,15 @@ export default {
     },
 
     props: {
-        value: [Date, String, Number],
-        range: {
-            type: Array,
-            validator(range) {
-                if (Array.isArray(range)) {
-                    return range.length === 2 && range.every(
-                        item => typeof item === 'string' ||
-                            typeof item === 'number' ||
-                            item instanceof Date);
-                } else {
-                    return true;
-                }
-            }
-        },
-        firstDayOfWeek: {
+        // 大小日历
+        type: {
             type: Number,
             default: 1
+        },
+        // 项目数据
+        lists: {
+            type: Array,
+            default: () => []
         }
     },
 
@@ -98,19 +126,32 @@ export default {
         };
     },
 
+    willMount() {
+
+    },
+
     methods: {
-        pickDay(day) {
-            this.realSelectedDay = day;
+
+        clickItem(projects, data) {
+            this.$emit('click-item', projects, data)
         },
 
+        hoverProject(projectId) {
+            this.selectedId = projectId
+        },
+
+        // 设置选中的天
+        pickDay(day) {
+            this.selectedDay = day;
+        },
+
+        // 切换月份
         selectDate(type) {
-            if (validTypes.indexOf(type) === -1) {
-                throw new Error(`invalid type ${type}`);
-            }
+
             let day = '';
-            if (type === 'prev-month') {
+            if (type === SWITCH_TYPE.Prev) {
                 day = `${this.prevMonthDatePrefix}-01`;
-            } else if (type === 'next-month') {
+            } else if (type === SWITCH_TYPE.Next) {
                 day = `${this.nextMonthDatePrefix}-01`;
             } else {
                 day = this.formatedToday;
@@ -120,6 +161,7 @@ export default {
             this.pickDay(day);
         },
 
+        // 转换为时间
         toDate(val) {
             if (!val) {
                 throw new Error('invalid val');
@@ -127,77 +169,82 @@ export default {
             return val instanceof Date ? val : new Date(val);
         },
 
+        // 
+        getRange() {
+            // 上周周一
+            const rangeStart = dayjs(this.now).startOf('week').subtract(13, 'day').format('YYYY-MM-DD');
+            // 本周周日
+            const rangeEnd = dayjs(this.now).endOf('week').add(15, 'day').format('YYYY-MM-DD ');
+
+            return [rangeStart, rangeEnd];
+        },
+
         rangeValidator(date, isStart) {
-            const firstDayOfWeek = this.realFirstDayOfWeek;
+            const firstDayOfWeek = this.firstDayOfWeek;
             const expected = isStart ? firstDayOfWeek : (firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1);
             const message = `${isStart ? 'start' : 'end'} of range should be ${weekDays[expected]}.`;
+
+
             if (date.getDay() !== expected) {
                 console.warn('[ElementCalendar]', message, 'Invalid range will be ignored.');
                 return false;
             }
             return true;
-        }
+        },
     },
 
     computed: {
+
+        // 选中 > 范围首天 > 此刻：它的意义是确定，我们要渲染的月份
+        date() {
+            if (this.selectedDay) {
+                // 返回选中的日期
+                const d = this.selectedDay.split('-');
+                return new Date(d[0], d[1] - 1, d[2]);
+            } else if (this.type === 2) {
+                // 返回范围内第一天
+                return this.validatedRange[0][0];
+            }
+            // 返回现在
+            return this.now;
+        },
+
+        // 上个月的[年-月]
         prevMonthDatePrefix() {
             const temp = new Date(this.date.getTime());
             temp.setDate(0);
             return fecha.format(temp, 'yyyy-MM');
         },
 
-        curMonthDatePrefix() {
-            return fecha.format(this.date, 'yyyy-MM');
-        },
-
+        // 下个月的[年-月]
         nextMonthDatePrefix() {
             const temp = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1);
             return fecha.format(temp, 'yyyy-MM');
         },
 
+        // date格式化
         formatedDate() {
             return fecha.format(this.date, 'yyyy-MM-dd');
         },
 
-        i18nDate() {
+        // data的描述
+        dateLabel() {
             const year = this.date.getFullYear();
             const month = this.date.getMonth() + 1;
-            return `${year} ${this.t('el.datepicker.year')} ${this.t('el.datepicker.month' + month)}`;
+            return `${year} 年 ${month} 月`;
         },
 
+        // now 的 yyyy-MM-dd格式
         formatedToday() {
             return fecha.format(this.now, 'yyyy-MM-dd');
         },
 
-        realSelectedDay: {
-            get() {
-                if (!this.value) return this.selectedDay;
-                return this.formatedDate;
-            },
-            set(val) {
-                this.selectedDay = val;
-                const date = new Date(val);
-                this.$emit('input', date);
-            }
-        },
 
-        date() {
-            if (!this.value) {
-                if (this.realSelectedDay) {
-                    const d = this.selectedDay.split('-');
-                    return new Date(d[0], d[1] - 1, d[2]);
-                } else if (this.validatedRange.length) {
-                    return this.validatedRange[0][0];
-                }
-                return this.now;
-            } else {
-                return this.toDate(this.value);
-            }
-        },
 
-        // if range is valid, we get a two-digit array
+        // 二维数组，外层维度是周，内层是该周的起始
         validatedRange() {
-            let range = this.range;
+
+            let range = this.getRange();
             if (!range) return [];
             range = range.reduce((prev, val, index) => {
                 const date = this.toDate(val);
@@ -231,7 +278,7 @@ export default {
                     lastDay
                 ]);
                 // 下一月的时间范围，需要计算一下该月的第一个周起始日
-                const firstDayOfWeek = this.realFirstDayOfWeek;
+                const firstDayOfWeek = this.firstDayOfWeek;
                 const nextMontFirstDay = startDay.getDay();
                 let interval = 0;
                 if (nextMontFirstDay !== firstDayOfWeek) {
@@ -254,19 +301,14 @@ export default {
             return [];
         },
 
-        realFirstDayOfWeek() {
-            if (this.firstDayOfWeek < 1 || this.firstDayOfWeek > 6) {
-                return 0;
-            }
-            return Math.floor(this.firstDayOfWeek);
+        // ~
+        SWITCH_TYPE() {
+            return SWITCH_TYPE;
         }
     },
 
-    data() {
-        return {
-            selectedDay: '',
-            now: new Date()
-        };
-    }
+
+
+
 };
 </script>
