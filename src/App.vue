@@ -8,7 +8,8 @@
             <el-option label="小日历"
                        :value="2" />
         </el-select>
-        <el-calendar :type="value"
+        <el-calendar :class="value === 1 ? 'user-style-big': 'user-style-small'"
+                     :type="value"
                      :lists="projectLists"
                      @click-item="handleClickProject">
 
@@ -81,4 +82,12 @@ export default {
 </script>
 
 <style lang="less">
+.user-style-small {
+    width: 300px;
+    background: lightgoldenrodyellow;
+}
+.user-style-big {
+    width: 900px;
+    background: lightgoldenrodyellow;
+}
 </style>

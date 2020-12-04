@@ -22,7 +22,8 @@ export default {
             type: Array,
             default: () => []
         },
-        selectedId: String
+        selectedId: String,
+        type: Number
     },
 
     inject: ['elCalendar'],
@@ -83,6 +84,9 @@ export default {
             return project.endTime - oneDay < date;
         },
         hasContent(project, date, classes, { rowIndex, itemIndex }) {
+            if (this.type === 2) {
+                return false;
+            }
             if (classes.indexOf('track-first') !== -1) {
                 return true;
             } else if (rowIndex === 0 && itemIndex === 0 && !this.hideHeader) {
@@ -132,6 +136,8 @@ export default {
             return <span class="project"></span>;
         },
 
+
+
         /**
          * 渲染日历中每个cell的方法，一个cell称为一个元素
          * @param {number} rowIndex  每一行的索引
@@ -142,8 +148,8 @@ export default {
             const date = this.getFormateDate(text, type);
             const cellDate = dayjs(date).valueOf();
             return <div class="date-container">
-                <div class="date-info">{text}</div>
-                <div class="project-lists" onpointermove={(e) => this.handlePointerMove(e)} >
+                <div class="date-info date-info-big">{text}</div>
+                <div class="project-lists project-lists-big" onpointermove={(e) => this.handlePointerMove(e)} >
                     {
                         this.projects.map((project, projectIndex) => this.renderProject(project, cellDate, {
                             projectIndex, rowIndex, itemIndex
@@ -244,6 +250,7 @@ export default {
     },
 
     render() {
+
         const thead = this.hideHeader ? null : (<thead>
             {
                 this.weekDays.map(day => <th key={day}>{day}</th>)
@@ -253,7 +260,9 @@ export default {
             <table
                 class={{
                     'el-calendar-table': true,
-                    'is-range': this.isInRange
+                    'is-range': this.isInRange,
+                    'calendar-table-big': this.type === 1,
+                    'calendar-table-small': this.type !== 1,
                 }}
                 cellspacing="0"
                 cellpadding="0">
@@ -288,8 +297,44 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-@dateHeight: 26px;
-@projectHeight: 14px;
+@date-height-big: 26px;
+@project-height-big: 14px;
+
+@date-height-small: 12px;
+@project-height-small: 4px;
+
+.calendar-table-big {
+    .date-container {
+        .date-info {
+            width: @date-height-big;
+            height: @date-height-big;
+            line-height: @date-height-big;
+            border-radius: @date-height-big / 2;
+        }
+        .project-lists {
+            .project {
+                height: @project-height-big;
+                line-height: @project-height-big;
+            }
+        }
+    }
+}
+.calendar-table-small {
+    .date-container {
+        .date-info {
+            width: @date-height-small;
+            height: @date-height-small;
+            line-height: @date-height-small;
+            border-radius: @date-height-small / 2;
+        }
+        .project-lists {
+            .project {
+                height: @project-height-small;
+                line-height: @project-height-small;
+            }
+        }
+    }
+}
 
 .el-calendar-day.project-container {
     background: #ffffff;
@@ -297,11 +342,7 @@ export default {
     padding: 0;
     .date-container {
         .date-info {
-            width: @dateHeight;
             font-size: 12px;
-            height: @dateHeight;
-            line-height: @dateHeight;
-            border-radius: @dateHeight / 2;
             margin: 0 auto;
             margin-top: 2px;
             margin-bottom: 2px;
@@ -312,17 +353,12 @@ export default {
             flex-direction: column;
             .project {
                 font-size: 12px;
-                height: @projectHeight;
-                line-height: @projectHeight;
                 margin-top: 2px;
                 color: #333;
                 text-overflow: ellipsis;
                 overflow: hidden;
                 white-space: nowrap;
             }
-            // .project:hover {
-            //     opacity: 0.8;
-            // }
             .track-first {
                 border-top-left-radius: 6px;
                 border-bottom-left-radius: 6px;
@@ -339,6 +375,7 @@ export default {
         }
     }
 }
+
 .is-today {
     .date-info {
         background: #ee3030;

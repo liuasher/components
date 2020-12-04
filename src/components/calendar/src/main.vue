@@ -5,16 +5,6 @@
                 {{ dateLabel }}
             </div>
 
-            <div :style="{fontSize:'12px'}">
-                {{selectedDay}}
-                <br />
-                {{validatedRange}}
-                <br />
-                {{getRange()}}
-                <br />
-                {{now}}
-            </div>
-
             <div class="el-calendar__button-group"
                  v-if="type === 1">
                 <el-button-group>
@@ -37,23 +27,24 @@
             </div>
         </div>
 
-        selectedId: {{selectedId}}
-
-        <div class="el-calendar__body"
+        <div class="el-calendar__body calendar-table-big"
              v-if="type === 1"
              key="no-range">
             <date-table :date="date"
+                        :type="type"
                         :selected-day="selectedDay"
                         :first-day-of-week="firstDayOfWeek"
                         :projects="lists"
+                        :selected-id="selectedId"
                         @pick="pickDay"
                         @pointer="hoverProject"
                         @click="clickItem" />
         </div>
         <div v-else
-             class="el-calendar__body"
+             class="el-calendar__body calendar-table-small"
              key="has-range">
             <date-table v-for="(range, index) in validatedRange"
+                        :type="type"
                         :key="index"
                         :date="range[0]"
                         :selected-day="selectedDay"
@@ -108,7 +99,7 @@ export default {
     },
 
     props: {
-        // 大小日历
+        // 大小日历: 1大日历 2小日历
         type: {
             type: Number,
             default: 1
@@ -312,3 +303,6 @@ export default {
 
 };
 </script>
+<style lang="less" scoped>
+// 大日历
+</style>
