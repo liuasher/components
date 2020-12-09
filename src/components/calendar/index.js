@@ -1,4 +1,4 @@
-import Calendar from './src/main';
+import Calendar from "./src/main";
 
 /* istanbul ignore next */
 Calendar.install = function(Vue) {

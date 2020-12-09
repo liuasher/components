@@ -1,33 +1,37 @@
+
 <template>
     <div class="el-calendar">
-        <div class="el-calendar__header">
-            <div class="el-calendar__title">
-                {{ dateLabel }}
+        <div class="el-calendar__hea-der">
+            <div class="title">
+                <span :class="type === 1 ? 'big-calendar' : 'small-calendar'">已授权日程（23）</span>
+                <span class="calendar-detail"
+                      @click="$emit('click-detail')"
+                      v-if="type === 2">查看</span>
+                <div class="el-calendar__button-group"
+                     v-else>
+                    <el-button-group>
+                        <el-button type="plain"
+                                   size="mini"
+                                   @click="selectDate(SWITCH_TYPE.Prev)">
+                            上个月
+                        </el-button>
+                        <el-button type="plain"
+                                   size="mini"
+                                   @click="selectDate(SWITCH_TYPE.Now)">
+                            本月
+                        </el-button>
+                        <el-button type="plain"
+                                   size="mini"
+                                   @click="selectDate(SWITCH_TYPE.Next)">
+                            下个月
+                        </el-button>
+                    </el-button-group>
+                </div>
             </div>
 
-            <div class="el-calendar__button-group"
-                 v-if="type === 1">
-                <el-button-group>
-                    <el-button type="plain"
-                               size="mini"
-                               @click="selectDate(SWITCH_TYPE.Prev)">
-                        {{ t('el.datepicker.prevMonth') }}
-                    </el-button>
-                    <el-button type="plain"
-                               size="mini"
-                               @click="selectDate(SWITCH_TYPE.Now)">
-                        {{ t('el.datepicker.today') }}
-                    </el-button>
-                    <el-button type="plain"
-                               size="mini"
-                               @click="selectDate(SWITCH_TYPE.Next)">
-                        {{ t('el.datepicker.nextMonth') }}
-                    </el-button>
-                </el-button-group>
-            </div>
         </div>
 
-        <div class="el-calendar__body calendar-table-big"
+        <div class="calendar-table-big"
              v-if="type === 1"
              key="no-range">
             <date-table :date="date"
@@ -41,7 +45,7 @@
                         @click="clickItem" />
         </div>
         <div v-else
-             class="el-calendar__body calendar-table-small"
+             class="calendar-table-small"
              key="has-range">
             <date-table v-for="(range, index) in validatedRange"
                         :type="type"
@@ -121,6 +125,22 @@ export default {
 
     },
 
+    mounted() {
+        if (this.type === 1) {
+            // 大日历
+            this.$emit('switch', this.getMonthRange(this.now))
+        } else {
+            // 小日历
+            const result = this.getRange()
+            const targetStart = dayjs(result[0]).hour(0).minute(0).second(0).millisecond(0)
+            const targetEnd = dayjs(result[1]).hour(23).minute(59).second(59).millisecond(59)
+            this.$emit('switch', {
+                start: targetStart,
+                end: targetEnd
+            })
+        }
+    },
+
     methods: {
 
         clickItem(projects, data) {
@@ -133,7 +153,19 @@ export default {
 
         // 设置选中的天
         pickDay(day) {
+            this.$emit('switch', this.getMonthRange(day))
             this.selectedDay = day;
+        },
+
+        // 大日历在用
+        getMonthRange(time) {
+            // 月初月末还要转成 月初所在周的周一 月末所在周的周日
+            const targetStart = dayjs(time).date(1).hour(0).minute(0).second(0).millisecond(0)
+            const targetEnd = dayjs(time).add(1, 'month').date(0).hour(23).minute(59).second(59).millisecond(59)
+            return {
+                start: targetStart,
+                end: targetEnd
+            }
         },
 
         // 切换月份
@@ -149,6 +181,8 @@ export default {
             }
 
             if (day === this.formatedDate) return;
+
+            // 传参
             this.pickDay(day);
         },
 
@@ -304,5 +338,25 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-// 大日历
+.title {
+    display: flex;
+    justify-content: space-between;
+    .calendar-detail {
+        color: #4e6def;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .calendar-detail:hover {
+        color: #8097f5;
+    }
+    .big-calendar {
+        font-size: 24px;
+    }
+    .small-calendar {
+        font-size: 14px;
+    }
+}
+.el-calendar {
+    padding: 10px;
+}
 </style>
