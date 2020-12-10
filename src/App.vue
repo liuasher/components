@@ -2,15 +2,8 @@
 <template>
     <div class="select-search">
 
-        <!-- <el-calendar class="user-style user-style-small"
+        <el-calendar class="user-style user-style-small"
                      :type="2"
-                     :lists="projectLists"
-                     @click-item="handleClickProject"
-                     @click-detail="handleClickDetail"
-                     @switch="handleSwitchMouth" /> -->
-
-        <el-calendar class="user-style user-style-big"
-                     :type="1"
                      :lists="projectLists"
                      @click-item="handleClickProject"
                      @click-detail="handleClickDetail"
@@ -18,7 +11,6 @@
 
         <el-drawer class="calendar-drawer"
                    :visible.sync="drawer"
-                   :show-close="false"
                    size="70%"
                    direction="rtl">
             <el-calendar class="user-style user-style-big"
@@ -43,12 +35,12 @@ export default {
 
         // 点击了项目
         handleClickProject(projects, data) {
-            console.log(projects, data);
+            // console.log(projects, data);
         },
 
         // 月份切换
         handleSwitchMouth({ start, end }) {
-            console.log(6666, start.format('YYYY-MM-DD HH:mm:ss'), end.format('YYYY-MM-DD HH:mm:ss'))
+            // console.log(6666, start.format('YYYY-MM-DD HH:mm:ss'), end.format('YYYY-MM-DD HH:mm:ss'))
         },
 
         //
@@ -58,16 +50,15 @@ export default {
     },
     data() {
         return {
-
             drawer: false,
             projectLists: [{
-                startTime: dayjs('2020-12-05 12:34:21').valueOf(),
-                endTime: dayjs('2020-12-20 12:34:21').valueOf(),
+                startTime: dayjs('2020-12-04 12:34:21').valueOf(),
+                endTime: dayjs('2020-12-06 12:34:21').valueOf(),
                 authDays: 10,
                 projectName: '九楼项 001',
                 projectId: 'pj.000001'
             }, {
-                startTime: dayjs('2020-12-15 06:45:23').valueOf(),
+                startTime: dayjs('2020-12-14 06:45:23').valueOf(),
                 endTime: dayjs('2020-12-16 06:45:23`').valueOf(),
                 authDays: 1,
                 projectName: '家庭项 002',
@@ -91,8 +82,8 @@ export default {
                 projectName: '家庭项 008',
                 projectId: 'pj.000008'
             }, {
-                startTime: dayjs('2020-11-10 23:30:34').valueOf(),
-                endTime: dayjs('2020-12-07 23:30:34').valueOf(),
+                startTime: dayjs('2020-12-01 23:30:34').valueOf(),
+                endTime: dayjs('2020-12-03 23:30:34').valueOf(),
                 authDays: 10,
                 projectName: '崇文办 003',
                 projectId: 'pj.000003'

@@ -197,9 +197,9 @@ export default {
         // 
         getRange() {
             // 上周周一
-            const rangeStart = dayjs(this.now).startOf('week').subtract(13, 'day').format('YYYY-MM-DD');
+            const rangeStart = dayjs(this.now).startOf('week').subtract(6, 'day').format('YYYY-MM-DD');
             // 本周周日
-            const rangeEnd = dayjs(this.now).endOf('week').add(15, 'day').format('YYYY-MM-DD ');
+            const rangeEnd = dayjs(this.now).endOf('week').add(8, 'day').format('YYYY-MM-DD ');
 
             return [rangeStart, rangeEnd];
         },

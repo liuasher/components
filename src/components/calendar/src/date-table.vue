@@ -4,7 +4,7 @@ import { range as rangeArr, getFirstDayOfMonth, getPrevMonthLastDays, getMonthDa
 import dayjs from 'dayjs';
 import Config from './config.ts'
 const oneDay = 86400000;
-
+const oneWeek = oneDay * 7;
 // 创建一个矩阵对象
 // 一起6行，每行最多20条数据
 
@@ -43,7 +43,8 @@ export default {
         return {
             WEEK_DAYS: getI18nSettings().dayNames,
             PresetColor: Config.PresetColor,
-            Matrix: this.getMatrix()
+            Matrix: this.getMatrix(),
+            Debug: false
         };
     },
 
@@ -98,14 +99,7 @@ export default {
             const date = this.getFormateDate(text, type);
             this.$emit('pick', date);
         },
-        // 当天是否为授权开始的那天
-        isStart(project, date) {
-            return project.startTime > date;
-        },
-        // 当天是否为授权结束的那天
-        isEnd(project, date) {
-            return project.endTime - oneDay < date;
-        },
+
         // 是否显示content: 第一天要显示，开始天数比日历第一天还早的要显示
         hasContent(project, date, classes, { rowIndex, itemIndex }) {
             if (this.type === 2) {
@@ -134,9 +128,7 @@ export default {
          */
         getPercent(project, isStart) {
             if (isStart) {
-                /**
-                 * 计算开始百分比 00:00:00 ~ [proStart ~ 23:59:59]
-                 */
+                /** 计算开始百分比 00:00:00 ~ [proStart ~ 23:59:59] */
                 const proStart = project.startTime
                 const todayEnd = dayjs(proStart).hour(23).minute(59).second(59).millisecond(59).valueOf()
                 // 样式要用marginLeft，所以要计算当天到开始的空白
@@ -144,9 +136,7 @@ export default {
                 const target = Math.round(value * 100)
                 return `${Math.min(target, 60)}%`
             } else {
-                /**
-                 * 计算结束百分比 [00:00:00 ~ proEnd] ~ 23:59:59
-                 */
+                /** 计算结束百分比 [00:00:00 ~ proEnd] ~ 23:59:59 */
                 const proEnd = project.endTime
                 const todayStart = dayjs(proEnd).hour(0).minute(0).second(0).millisecond(0).valueOf()
                 // 样式使用width，所以使用是当天到结束
@@ -156,8 +146,27 @@ export default {
             }
         },
 
+        /** 项目的开始 */
+        startHitLane(project, date) {
+            const { dayStart, dayEnd } = this.dayRange(date)
+            const { startTime, endTime } = project
+            return dayStart <= startTime && startTime <= dayEnd
+        },
+        /** 项目的过程 */
+        durationHitLane(project, date) {
+            const { dayStart, dayEnd } = this.dayRange(date)
+            const { startTime, endTime } = project
+            return startTime < dayStart && dayEnd < endTime
+        },
+        /** 项目的结束 */
+        endHitLane(project, date) {
+            const { dayStart, dayEnd } = this.dayRange(date)
+            const { startTime, endTime } = project
+            return startTime < dayStart && (dayStart < endTime && endTime < dayEnd)
+        },
+
         /**
-         * 元素内渲染每个project的方法
+         * 元素内渲染每个project的方法（每个cell遍历渲染project）
          * @param {project} project  项目
          * @param {timestamp} date  元素代表的日期
          * @param {number} rowIndex  每一行的索引
@@ -165,8 +174,7 @@ export default {
          * @param {number} projectIndex 元素内项目的索引
          */
         renderProject(project, date, indexGroup) {
-            const { projectIndex } = indexGroup;
-
+            const { projectIndex, rowIndex, itemIndex } = indexGroup;
             // 先取出项目对应的颜色
             const BackgroundStyle = [{ backgroundColor: this.PresetColor[projectIndex] }]
             const MarginStyle = []
@@ -174,53 +182,57 @@ export default {
             const HoverClass = [];
             const BorderClass = []
             const WrapBorderClass = []
+            const content = []
 
-            // calculateRowHitState
+            // 选中的统一加上border
+            if (projectIndex == this.selectedId) {
+                HoverClass.push('project-wrap-hover')
+            }
 
-            // 设置命中行的状态
-            if (project.startTime - oneDay <= date && date <= project.endTime) {
-                if (this.isStart(project, date)) {
-                    BorderClass.push('project-first');
-                    WrapBorderClass.push('project-wrap-first');
-                    MarginStyle.push({ marginLeft: this.getPercent(project, true) })
-                }
-                if (this.isEnd(project, date)) {
-                    BorderClass.push('project-last');
-                    WrapBorderClass.push('project-wrap-last');
-                    MarginStyle.push({ width: this.getPercent(project, false) })
-                }
-                const hasContent = this.hasContent(project, date, BorderClass, indexGroup);
-                const content = `（${indexGroup.projectIndex}）查看`
+            // 每行泳道的第一个元素
+            if (indexGroup.itemIndex === 0) {
+                this.isLaneOverlap(project, date, indexGroup)
+            }
 
+            // 获取当天的日期范围
+            const { dayStart, dayEnd } = this.dayRange(date)
 
-                if (projectIndex == this.selectedId) {
-                    HoverClass.push('project-wrap-hover')
-                }
+            if (this.startHitLane(project, date)) {
+                /** 开始命中 */
+                BorderClass.push('project-first');
+                WrapBorderClass.push('project-wrap-first');
+                MarginStyle.push({ marginLeft: this.getPercent(project, true) })
 
-                return <el-tooltip open-delay={600} class="item" effect="dark" placement="top">
-                    <div slot="content">{this.getTips(project)}</div>
-                    <span data-project-index={projectIndex} class={['project-wrap', WrapBorderClass, HoverClass]} style={MarginStyle}>
-                        <span data-project-index={projectIndex} class={['project', BorderClass]} style={BackgroundStyle}>
-                            {hasContent ? content : ''}
-                        </span>
+            } else if (this.endHitLane(project, date)) {
+                /** 结束命中 */
+                BorderClass.push('project-last');
+                WrapBorderClass.push('project-wrap-last');
+                MarginStyle.push({ width: this.getPercent(project, false) })
+
+            } else if (this.durationHitLane(project, date)) {
+                /** 过程命中 */
+
+            } else {
+                /** 未命中，未命中的有自己的显隐逻辑 */
+                return this.noHitLane(project, date, indexGroup)
+            }
+
+            /** 一个泳道上如何显示content有自己的计算规则（不能笼统的放在startHit） */
+            const hasContent = this.hasContent(project, date, BorderClass, indexGroup);
+            hasContent && content.push(`（${indexGroup.projectIndex + 1}）查看`)
+            // hasContent && content.push(`${project.projectName}`)
+
+            // 命中的统一处理
+            return <el-tooltip open-delay={600} class="item" effect="dark" placement="top">
+                <div slot="content">{this.getTips(project)}</div>
+                <span data-project-index={projectIndex} class={['project-wrap', WrapBorderClass, HoverClass]} style={MarginStyle}>
+                    <span data-project-index={projectIndex} class={['project', BorderClass]} style={BackgroundStyle}>
+                        {
+                            this.Debug ? `${projectIndex}-${rowIndex}-${itemIndex}` : content
+                        }
                     </span>
-                </el-tooltip>;
-            }
-
-            // 设置空白行的状态
-            return this.calculateRowEmptyState(project, date, indexGroup)
-        },
-
-        // 计算某一行项目的命中状态
-        calculateRowHitState(project, date) {
-            const { rowStart, rowEnd } = this.getWeekRange(date)
-            const projectStartHit = rowStart < project.startTime
-            const projectEndHit = project.endTime < rowEnd
-            return {
-                hitstart: projectStartHit,
-                hitEnd: projectEndHit,
-                content: `${projectStartHit ? '头命中' : ''} ${projectEndHit ? '尾命中' : ''}`
-            }
+                </span>
+            </el-tooltip>;
         },
 
         /**
@@ -239,72 +251,209 @@ export default {
             return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
         },
 
-        // 计算本项目开始和下一个项目结束的关系
-        calculateStartWithNextEnd(project, date, { projectIndex, rowIndex, itemIndex }) {
-
-        },
-
-        // 计算本项目结束和下一个项目开始的关系
-        calculateEndWithNextStart(project, date, { projectIndex, rowIndex, itemIndex }) {
-
+        /**
+         * 返回一天的00:00:00 - 23:59:59
+         */
+        dayRange(date) {
+            const dayStart = dayjs(date);
+            const dayEnd = dayjs(date).hour(23).minute(59).second(59).millisecond(59)
+            return { dayStart, dayEnd }
         },
 
         /**
+         * 项目没有命中本周
+         */
+        notHitWeek({ startTime, endTime }, date) {
+            const { rowStart, rowEnd } = this.getWeekRange(date)
+            return rowEnd < startTime || endTime < rowStart
+        },
+        /**
+         * 项目开始命中本周 
+         */
+        startHitWeek({ startTime, endTime }, date) {
+            const { rowStart, rowEnd } = this.getWeekRange(date)
+            return rowStart <= startTime && startTime <= rowEnd
+        },
+        /**
+         * 项目结束命中本周 
+         */
+        endHitWeek({ startTime, endTime }, date) {
+            const { rowStart, rowEnd } = this.getWeekRange(date)
+            return rowStart <= endTime && endTime <= rowEnd
+        },
+        /**
+         * 判断最近两个项目泳道是否重叠
+         * @param {1 | 2} lapType  命中方式 1:头命中 2:尾命中
+         */
+        isLaneOverlap(project, date, { rowIndex, itemIndex, projectIndex }) {
+            const nextPro = this.projects[projectIndex + 1]
+            // 如果已经没有了
+            if (nextPro === undefined || project === undefined) return;
+
+            // 先判断本周的命中类型
+            const startHitWeek = this.startHitWeek(project, date)
+            const endHitWeek = this.endHitWeek(project, date)
+
+            const { startTime: pS, endTime: pE } = project
+            const { startTime: nS, endTime: nE } = nextPro
+
+            if (startHitWeek && endHitWeek === true) {
+                // console.log(`首尾都命中: ${projectIndex}-${rowIndex}-${itemIndex}`, project.projectName)
+                this.compareBoth(project, nextPro, { rowIndex, itemIndex, projectIndex })
+            } else if (startHitWeek === true) {
+                // console.log(`首命中: ${projectIndex}-${rowIndex}-${itemIndex}`, project.projectName)
+                this.compareStart(project, nextPro, { rowIndex, itemIndex, projectIndex })
+            } else if (endHitWeek === true) {
+                // console.log(`尾命中: ${projectIndex}-${rowIndex}-${itemIndex}`, project.projectName)
+                this.compareEnd(project, nextPro, { rowIndex, itemIndex, projectIndex })
+            } else {
+                // 未命中的会由别的逻辑过滤掉
+            }
+
+        },
+
+
+        /**
+         * 处理矩阵
+         * 元素内渲染每个project的方法（每个cell遍历渲染project）
+         * @param {number} rowIndex  每一行的索引（周索引）
+         * @param {number} projectIndex 元素内项目的索引
+         */
+        matrixMerget(pRange, nRange, projectIndex, rowIndex) {
+
+            const notHitAbove = false;
+
+            // const prev = this.Matrix[projectIndex - 1][rowIndex]
+            // const current = this.Matrix[projectIndex][rowIndex]
+            // const nect = this.Matrix[projectIndex + 1][rowIndex]
+
+
+            // const target = this.Matrix[projectIndex][rowIndex]
+            // if (target instanceof Array) {
+            //     this.Matrix[projectIndex][rowIndex] = target.concat(pRange)
+            // } else {
+            //     this.Matrix[projectIndex][rowIndex] = pRange
+            // }
+            // if (this.Matrix[projectIndex + 1] !== undefined) {
+            //     this.Matrix[projectIndex + 1][rowIndex] = nRange
+            // }
+        },
+
+        // 首尾都命中
+        compareBoth(
+            { startTime: pS, endTime: pE, projectName: pN },
+            { startTime: nS, endTime: nE, projectName: nN },
+            { rowIndex, itemIndex, projectIndex }
+        ) {
+            const nextEndHix = this.endHitWeek({ startTime: nS, endTime: nE }, pS)
+            const nextStartHix = this.startHitWeek({ startTime: nS, endTime: nE }, pS)
+
+            if ((nE < pS) && nextEndHix) {
+                // 上个没开始，下个结束了
+                const pRange = this.getRange(pS, false)
+                const nRange = this.getRange(nE, true)
+                this.matrixMerget(pRange, nRange, projectIndex, rowIndex)
+                // console.log('上后下先，上面需要标注范围：', pN, pRange)
+            } else if ((pE < nS) && nextStartHix) {
+                // 下个没开始，上个结束了
+                const pRange = this.getRange(pE, true)
+                const nRange = this.getRange(nS, false)
+                this.matrixMerget(pRange, nRange, projectIndex, rowIndex)
+                // console.log('上先下后，上面需要标注范围：', pN, pRange)
+            }
+        },
+
+        // 开头命中
+        compareStart({ pS, pE }, { nS, nE }) {
+
+        },
+        // 结尾命中
+        compareEnd({ pS, pE }, { nS, nE }) {
+
+        },
+        // 传入一个日期，它占据周几的索引
+        // 比如传入周三 true, 返回[0,1,2]
+        // 传入周四 false，返回[3,4,5,6]
+        // 1~6 周一~周六 0 周日
+        getRange(date, inOrder) {
+            const target = dayjs(date).day()
+            console.log('--------->: ', target, inOrder)
+            switch (target) {
+                case 0:
+                    return inOrder ? [] : [0, 1, 2, 3, 4, 5]
+                case 1:
+                    return inOrder ? [1, 2, 3, 4, 5, 6] : []
+                case 2:
+                    return inOrder ? [2, 3, 4, 5, 6] : [0]
+                case 3:
+                    return inOrder ? [3, 4, 5, 6] : [0, 1]
+                case 4:
+                    return inOrder ? [4, 5, 6] : [0, 1, 2]
+                case 5:
+                    return inOrder ? [5, 6] : [0, 1, 2, 3]
+                case 6:
+                    return inOrder ? [6] : [0, 1, 2, 3, 4]
+            }
+        },
+        /**
          * 判断某一行的项目列表是否显示，如果某一行没有项目命中，该行就不显示
-         * @param {number} rowIndex  每一行的索引
+         * @param {number} rowIndex  每一行的索引（周索引）
          * @param {number} itemIndex 一行内元素的索引
          * @param {number} projectIndex 元素内项目的索引
          */
-        calculateRowEmptyState(project, date, { projectIndex, rowIndex, itemIndex }) {
+        noHitLane(project, date, { projectIndex, rowIndex, itemIndex }) {
 
+            /** 默认空白占位符 */
             const defaultDom = <span class="project-wrap">
                 <span class="project"></span>
             </span>
 
-            // 小日历不作判断，由两个日历拼接，懒得维护变量
+            // 小日历不作判断，小日历是两个日历拼接，懒得维护变量~
             if (this.type === 2) return defaultDom;
 
-            // 每周的第一天开始计算
+            /** 每个泳道的第一列（每周的第一天） */
             if (itemIndex === 0) {
-                const { rowStart, rowEnd } = this.getWeekRange(date)
 
-                if (project.endTime < rowStart || rowEnd < project.startTime) {
-                    // 如果这一行都是空白的
-                    this.Matrix[projectIndex][rowIndex] = true
-                    return <span class="project-wrap-?" >
+                if (this.notHitWeek(project, date)) {
+                    // 如果这一整行都没命中，标记为true (不显示)
+                    this.Matrix[projectIndex][rowIndex] = [0, 1, 2, 3, 4, 5, 6]
+                    return <span class={"project-wrap-?"} >
                         <span class="project"></span>
                     </span>;
                 }
             } else {
                 // 如果不是第一个item 
-                if (this.Matrix[projectIndex][rowIndex] === true) {
-                    // 如果这一行都被标记为true (不显示)
+                const Matrix = this.Matrix[projectIndex][rowIndex]
+                /**
+                 * Matrix 矩阵里面会有两种类型的值
+                 * @param {booean} Matrix true表示一整行都要隐藏
+                 * @param {array[number]} Matrix 0-6 表示周一到周日，数组中有值表示该天要隐藏
+                 */
+                if (Matrix !== false && Matrix.indexOf(itemIndex) !== -1) {
                     return <span class="project-wrap-?" >
                         <span class="project"></span>
                     </span>;
                 }
             }
 
-            if (this.isStart(project, date)) {
-                // 如果没有标注，如何本排和下一排没有啮合，可以合并
-                // 无非两种情况（上面的结束了下面还没开始、下面的结束了上面还没开始）
-                // 只需要在遇到[开始][结束]节点才需要计算
-                return <span class="project-wrap" >
+            if ([
+                // '123', '124', '125', '126',
+                // '220', '221', '222',
+                // '225', '226',
+                // '320', '321', '322', '323', '324',
+                // '425', '426'
+            ].indexOf(`${projectIndex}${rowIndex}${itemIndex}`) !== -1) {
+                return <span class="project-wrap->" >
                     <span class="project"></span>
                 </span>;
             }
 
-            // if ([
-            //     // '220', '221', '222', '123', '124', '125', '126',
-            //     // '320', '321', '322', '323', '324', '225', '226',
-            // ].indexOf(`${projectIndex}${rowIndex}${itemIndex}`) !== -1) {
-            //     return <span class="project-wrap-?" >
-            //         <span class="project"></span>
-            //     </span>;
-            // }
-
             return <span class="project-wrap" >
-                <span class="project">{projectIndex} {rowIndex} {itemIndex}</span>
+                <span class="project">
+                    {
+                        this.Debug ? `${projectIndex} ${rowIndex} ${itemIndex}` : ''
+                    }
+                </span>
             </span>;
         },
 
