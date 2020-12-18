@@ -4,12 +4,11 @@ module.exports = {
         node: true,
     },
     globals: {
-        sensors: true,
-        '_': true,
+
     },
     extends: [
-     
-        '@vue/airbnb',
-   
+
+
+
     ],
 };

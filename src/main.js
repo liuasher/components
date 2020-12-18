@@ -1,18 +1,17 @@
-
 import Vue from 'vue';
+import ElementUI from 'element-ui';
 import App from './App.vue';
 import router from './router/index';
 import store from './store/index';
-import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 
-import calendar from '@/components/calendar';
+import TopologyGraph from '@/components/topology-graph/index';
 
 Vue.use(ElementUI);
-Vue.use(calendar);
+Vue.use(TopologyGraph);
 
 new Vue({
     router,
     store,
-    render: h => h(App)
+    render: (h) => h(App),
 }).$mount('#app');
